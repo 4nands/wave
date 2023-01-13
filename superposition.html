@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <title>反射波</title>
+    <style>
+        #canvas{
+            width: 1000px;
+            height: 500px;
+            background-color: #000000;            
+        }
+    </style>
+    <script>
+        let canvasElement;
+        let context;
+        let width;
+        let height;
+        let t=0;
+        let dx=1;
+        let lx=100;
+        let px0=0;
+        let px1=100;
+        let px2=200;
+        let px3=0;
+        let px4=100;
+        let px5=200;
+        let vx0=1;
+
+        let k0;
+        let k1;
+        let k2;
+        let k3;
+
+        let a0=100;
+        let a1=100;
+        let a0Slider;
+        let a1Slider;
+        let px1Slider;
+        let px2Slider;
+        let px4Slider;
+        let px5Slider;
+
+        let o0Slider;
+        let o1Slider;
+        let o0=0;
+        let o1=0;
+        let vSlider;
+        
+
+        window.addEventListener('load',function(){drawStart();})
+        function drawStart(){
+            canvasElement=document.getElementById('canvas');
+            canvasElement.width=canvasElement.clientWidth;
+            canvasElement.height=canvasElement.clientHeight;
+            context=canvasElement.getContext('2d');
+
+            width=canvasElement.clientWidth;
+            height=canvasElement.clientHeight;
+          
+            a0Slider = document.getElementById('a0Slider');
+            a0Slider.value=a0;
+            a0Slider.addEventListener('input', a0Change);
+
+            a1Slider = document.getElementById('a1Slider');
+            a1Slider.value=a1;
+            a1Slider.addEventListener('input', a1Change);
+
+            px1Slider = document.getElementById('px1Slider');
+            px1Slider.value=px1;
+            px1Slider.max=px2;
+            px1Slider.addEventListener('input', px1Change);
+
+            px2Slider = document.getElementById('px2Slider');
+            px2Slider.value=px2;
+            px2Slider.min=px1;
+            px2Slider.addEventListener('input', px2Change);
+            
+            px4Slider = document.getElementById('px4Slider');
+            px4Slider.value=px4;
+            px4Slider.max=px5;
+            px4Slider.addEventListener('input', px4Change);
+
+            px5Slider = document.getElementById('px5Slider');
+            px5Slider.value=px5;
+            px5Slider.min=px4;
+            px5Slider.addEventListener('input', px5Change);
+
+            o0Slider = document.getElementById('o0Slider');
+            o0Slider.value=0;
+            o0Slider.addEventListener('input', o0Change);
+
+            o1Slider = document.getElementById('o1Slider');
+            o1Slider.value=0;
+            o1Slider.addEventListener('input', o1Change);
+            vSlider = document.getElementById('vSlider');
+            vSlider.value=1;
+            vSlider.addEventListener('input', vChange);
+
+            initPx();
+
+        
+            loop();
+    
+        }
+        function calK(){
+            k0=a0/(px1-px0);
+            k1=a0/(px2-px1-o0);
+            k2=a1/(px3-px4);
+            k3=a1/(px4-px5-o1);
+        }
+        function initPx(){
+            px0=0;
+            px1=px1Slider.value*1;
+            px2=px2Slider.value*1;
+            px3=0;
+            px4=px4Slider.value*1;
+            px5=px5Slider.value*1;
+
+            px3=width-px3;
+            px4=width-px4;
+            px5=width-px5;
+
+            calK();
+            
+
+      
+        }
+        function getY(x){
+            let y1=0;
+            let y2=0;
+            if(x>=px0 && x<px1){
+                y1=(x-px0)*k0;
+            }
+            if(x>=px1 && x<px2){
+                y1=(px1-x)*k1+(px1-px0)*k0;
+            }
+            if(x<px3 && x>=px4){
+                y2=(px3-x)*k2;
+
+            }
+            if(x<px4 && x>=px5){
+                y2=(x-px4)*k3+(px3-px4)*k2;
+
+            }
+
+            return y1+y2;
+
+        }
+        function loop(){
+            context.clearRect(0,0,width,height);
+            context.strokeStyle="#ffffff";
+            context.lineWidth=5;
+            y=height/2
+            for(i=0;i<width;i++){
+                x0=i;
+                x1=x0+dx;
+                y0=getY(x0);
+                y1=getY(x1);
+                
+                context.beginPath();
+                context.moveTo(x0,y-y0);
+                context.lineTo(x1,y-y1);
+                context.closePath();
+                context.stroke();
+
+            }
+            px0+=vx0;
+            px1+=vx0;
+            px2+=vx0;
+
+            px3-=vx0;
+            px4-=vx0;
+            px5-=vx0;
+            
+            t++;
+            
+            if(px0>width){
+                t=0;
+                initPx();
+            }
+            requestAnimationFrame(loop)
+
+
+        }
+        function a0Change(event){
+            a0=a0Slider.value;
+            calK();
+
+        }
+        function a1Change(event){
+            a1=a1Slider.value;
+            calK();
+
+        }
+        function px1Change(event){
+            px1=px1Slider.value*1+px0;
+            px2Slider.min=px1Slider.value;
+            calK();
+
+        }
+        function px2Change(event){
+            px2=px2Slider.value*1+px0;
+            px1Slider.max=px2Slider.value;
+            calK();
+
+        }
+        function px4Change(event){
+            px4=px3-px4Slider.value*1;
+            px5Slider.min=px4Slider.value;
+            calK();
+
+        }
+        function px5Change(event){
+            px5=px3-px5Slider.value*1;
+         
+            px4Slider.max=px5Slider.value;
+            calK();
+
+        }
+        function o0Change(event){
+            o0=o0Slider.value*1;
+         
+            calK();
+
+        }
+        function o1Change(event){
+            o1=o1Slider.value*1;
+         
+            calK();
+
+        }
+        function vChange(event){
+            vx0=vSlider.value*1;
+         
+            calK();
+
+        }
+    </script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <br>
+    <label>振幅1<input type="range" id="a0Slider" min="-200" max=200></label>
+    <label>頂点1<input type="range" id="px1Slider" min="1"></label>
+    <label>幅1<input type="range" id="px2Slider" max="400"></label>
+    <label>補正1<input type="range" id="o0Slider" min="-100" max="50"></label>
+    <br>
+    <label>振幅2<input type="range" id="a1Slider" min="-200" max=200></label>
+    <label>頂点2<input type="range" id="px4Slider" min="1"></label>
+    <label>幅3<input type="range" id="px5Slider" max="400"></label>
+    <label>補正2<input type="range" id="o1Slider" min="-100" max="50"></label>
+    <br>
+    <label>速さ<input type="range" id="vSlider" min="0" max="5" step="0.1"></label>
+
+ 
+    <br>
+    
+</body>
+</html>

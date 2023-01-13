@@ -1,0 +1,115 @@
+﻿<html>
+	<head>
+		<style>
+			#c1{
+				width: 1200px;
+				height: 230px;
+				background-color: #000000;
+			}
+			#c2{
+				width: 1200px;
+				height: 230px;
+				background-color: #000000;
+			}
+		</style>
+		<title>正弦波</title>
+		<script>
+
+			var A=100;//振幅
+			var T=500;//周期
+			var L=400;//波長
+
+			var t=0;//時間
+			var r=20;//媒質の大きさ
+
+
+			onload=function(){
+				wave2();
+				wave();
+			}
+			function wave(){
+				var cvs=document.getElementById("c1");
+				var ctx=cvs.getContext("2d");
+					
+				var cy;//媒質の中心座標
+				var x;//媒質のx座標
+				var y;//媒質のy座標
+						
+				cvs.width=cvs.clientWidth;
+				cvs.height=cvs.clientHeight;
+
+				ctx.strokeStyle="#ffffff"
+
+
+				cy=cvs.height/2;
+					
+				ctx.beginPath();				
+				for(x=0;x<cvs.width;x++){//A
+					
+					
+				y=A*Math.sin(Math.PI*2*(t/T-x/L));
+					
+				if(x===0){
+					ctx.moveTo(x,cy-y);
+				}
+				else{
+					ctx.lineTo(x,cy-y);
+					
+				}
+				}//A
+				ctx.lineWidth=5;
+				ctx.stroke();
+				t++;
+					
+				window.requestAnimationFrame(wave);
+			}
+
+			function wave2(){
+				var cvs=document.getElementById("c2");
+				var ctx=cvs.getContext("2d");
+					
+				var cy;//媒質の中心座標
+				var x;//媒質のx座標
+				var y;//媒質のy座標
+
+						
+				cvs.width=cvs.clientWidth;
+				cvs.height=cvs.clientHeight;
+
+				ctx.strokeStyle="#ffffff"
+
+
+				cy=cvs.height/2;
+					
+				ctx.beginPath();				
+				for(x=0;x<cvs.width;x++){//A
+					
+					
+				y=A*0.4*Math.sin(Math.PI*2*(t/T-x/L))+A*0.2*Math.sin(Math.PI*2*(t/T-x/L/2))+A*0.5*Math.sin(Math.PI*2*(t/T-x/L*2));
+					
+
+				if(x===0){
+					ctx.moveTo(x,cy-y);
+				}
+				else{
+					ctx.lineTo(x,cy-y);
+					
+				}
+
+				}//A
+				ctx.lineWidth=5;
+				ctx.stroke();
+				t++;
+					
+				window.requestAnimationFrame(wave2);
+			}
+		</script>
+	</head>
+	<body>
+		<h2>一般の波</h2>
+		<canvas id="c2"></canvas>
+		<h2>正弦波</h2>
+		<canvas id="c1"></canvas>
+
+	</body>
+</html>
