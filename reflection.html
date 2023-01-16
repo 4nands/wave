@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <title>反射波</title>
+    <style>
+        #canvas{
+            width: 700px;
+            height: 500px;
+            background-color: #000000;            
+        }
+    </style>
+    <script>
+        let canvasElement;
+        let context;
+        let width;
+        let height;
+        let t=0;
+        let dx=1;
+        let lx=100;
+        let px0=0;
+        let px1=100;
+        let px2=200;
+        let px3=0;
+        let px4=100;
+        let px5=200;
+        let vx0=1;
+
+        let k0;
+        let k1;
+        let k2;
+        let k3;
+
+        let a0=100;
+        let a1=100;
+        let a0Slider;
+        let a1Slider;
+        let px1Slider;
+        let px2Slider;
+
+        let modeBox;
+
+        let w0Box;
+        let w1Box;
+        let w2Box;
+        let w3Box;
+      
+        let o0Slider;
+        let o0=0;
+        let o1=0;
+        let vSlider;
+
+        let L=0;        //蚊別の位置
+        
+
+        window.addEventListener('load',function(){drawStart();})
+        function drawStart(){
+            canvasElement=document.getElementById('canvas');
+            canvasElement.width=canvasElement.clientWidth;
+            canvasElement.height=canvasElement.clientHeight;
+            context=canvasElement.getContext('2d');
+
+            width=canvasElement.clientWidth;
+            height=canvasElement.clientHeight;
+
+            L=width*0.8;
+          
+            a0Slider = document.getElementById('a0Slider');
+            a0Slider.value=a0;
+            a0Slider.addEventListener('input', a0Change);
+
+        
+            px1Slider = document.getElementById('px1Slider');
+            px1Slider.value=px1;
+            px1Slider.max=px2;
+            px1Slider.addEventListener('input', px1Change);
+
+            px2Slider = document.getElementById('px2Slider');
+            px2Slider.value=px2;
+            px2Slider.min=px1;
+            px2Slider.addEventListener('input', px2Change);
+            
+          
+
+            o0Slider = document.getElementById('o0Slider');
+            o0Slider.value=0;
+            o0Slider.addEventListener('input', o0Change);
+
+            vSlider = document.getElementById('vSlider');
+            vSlider.value=1;
+            vSlider.addEventListener('input', vChange);
+
+            modeBox = document.getElementById('mode0');
+            w0Box = document.getElementById('w0Box');
+            w1Box = document.getElementById('w1Box');
+            w2Box = document.getElementById('w2Box');
+            w3Box = document.getElementById('w3Box');
+         
+
+            initPx();
+
+        
+            loop();
+    
+        }
+        function calK(){
+            k0=a0/(px1-px0);
+            k1=a0/(px2-px1-o0);
+           
+        }
+        function initPx(){
+            px0=0;
+            px1=px1Slider.value*1;
+            px2=px2Slider.value*1;
+            px3=0;
+
+            px3=L*2-px3;
+            px4=L*2-px1;
+            px5=L*2-px2;
+
+            calK();
+        }
+        function getY1(x){
+            let y1=0;
+            if(x>=px0 && x<px1){
+                  y1=(x-px0)*k0;
+            }
+            if(x>=px1 && x<px2){
+                y1=(px1-x)*k1+(px1-px0)*k0;
+            }
+            return y1
+        }
+        function getY2(x){
+            let y2=0;
+            let par=-1;
+            if(x<px3 && x>=px4){
+                y2=(px3-x)*k0;
+            }
+            if(x<px4 && x>=px5){
+                y2=(x-px4)*k1+(px3-px4)*k0;
+            }
+            if(modeBox.checked){
+                par=1;
+            }
+            return y2*par;   
+        }
+        function getY(x){
+            let y1=getY1(x);
+            let y2=getY2(x);
+          
+           
+            
+            return y1+y2;
+
+        }
+        function wave0(){
+            //入射波
+            context.strokeStyle="#ff8888";
+            context.lineWidth=5;
+            y=height/2;
+         
+            for(i=0;i<L;i++){
+                x0=i;
+                x1=x0+dx;
+                y0=getY1(x0);
+                y1=getY1(x1);
+                
+                context.beginPath();
+                context.moveTo(x0,y-y0);
+                context.lineTo(x1,y-y1);
+                context.closePath();
+                context.stroke();
+
+            }
+   
+        }
+        function wave1(){
+            //透過波
+            context.strokeStyle="#88ff88";
+            context.lineWidth=5;
+            y=height/2;
+         
+            for(i=L;i<width;i++){
+                x0=i;
+                x1=x0+dx;
+                y0=getY1(x0);
+                y1=getY1(x1);
+                
+                context.beginPath();
+                context.moveTo(x0,y-y0);
+                context.lineTo(x1,y-y1);
+                context.closePath();
+                context.stroke();
+
+            }
+   
+        }
+        
+        function wave2(){
+            //反射波
+            context.strokeStyle="#8888ff";
+            context.lineWidth=5;
+            y=height/2;
+         
+            for(i=0;i<L;i++){
+                x0=i;
+                x1=x0+dx;
+                y0=getY2(x0);
+                y1=getY2(x1);
+                
+                context.beginPath();
+                context.moveTo(x0,y-y0);
+                context.lineTo(x1,y-y1);
+                context.closePath();
+                context.stroke();
+
+            }
+   
+        }
+        function wave3(){
+            context.strokeStyle="#ffffff";
+            context.lineWidth=5;
+            y=height/2
+            for(i=0;i<L;i++){
+                x0=i;
+                x1=x0+dx;
+                y0=getY(x0);
+                y1=getY(x1);
+                
+                context.beginPath();
+                context.moveTo(x0,y-y0);
+                context.lineTo(x1,y-y1);
+                context.closePath();
+                context.stroke();
+
+            }
+
+        }
+        function loop(){
+            context.clearRect(0,0,width,height);
+            if(w0Box.checked){wave0();} //入射波
+            if(w1Box.checked){wave1();} //透過波
+            if(w2Box.checked){wave2();} //反射波
+            if(w3Box.checked){wave3();} //合成波
+
+            //壁
+            context.strokeStyle="#ffffff";
+            context.lineWidth=10;
+            context.beginPath();
+            context.moveTo(L,0);
+            context.lineTo(L,height);
+            context.closePath();
+            context.stroke();
+            
+            context.fillStyle="#888888";
+            context.beginPath();
+            context.arc(L,y-getY(L),20,0,2*Math.PI,false);
+            context.closePath();
+            context.fill();
+
+            px0+=vx0;
+            px1+=vx0;
+            px2+=vx0;
+
+            px3-=vx0;
+            px4-=vx0;
+            px5-=vx0;
+            
+            t++;
+            
+            if(px0>width){
+                t=0;
+                initPx();
+            }
+            requestAnimationFrame(loop)
+
+
+        }
+        function a0Change(event){
+            a0=a0Slider.value;
+            calK();
+
+        }
+        
+        function px1Change(event){
+            d=px1Slider.value*1;
+            px1=d+px0;
+            px4=px3-d;
+            px2Slider.min=px1Slider.value;
+            calK();
+
+        }
+        function px2Change(event){
+            d=px2Slider.value*1;
+            px2=d+px0;
+            px5=px3-d;
+            px1Slider.max=px2Slider.value;
+            calK();
+
+        }
+    
+        function o0Change(event){
+            o0=o0Slider.value*1;
+         
+            calK();
+
+        }
+        function vChange(event){
+            vx0=vSlider.value*1;
+         
+            calK();
+
+        }
+    </script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <br>
+    <label><input type="radio" name='mode' id="mode0" checked>自由端</label>
+    <label><input type="radio" name='mode' id="mode1">固定端</label>
+    <br>
+    <label><input type="checkbox" id="w0Box">入射波</label>
+    <label><input type="checkbox" id="w1Box">透過波</label>
+    <label><input type="checkbox" id="w2Box">反射波</label>
+    <label><input type="checkbox" id="w3Box" checked>合成波</label>
+
+    
+    <br>
+
+    <label>振幅1<input type="range" id="a0Slider" min="-200" max=200></label>
+    <label>頂点1<input type="range" id="px1Slider" min="1"></label>
+    <label>幅1<input type="range" id="px2Slider" max="400"></label>
+    <br>
+    <label>補正1<input type="range" id="o0Slider" min="-100" max="50"></label>
+    <label>速さ<input type="range" id="vSlider" min="0" max="5" step="0.1"></label>
+
+ 
+    <br>
+    
+</body>
+</html>
