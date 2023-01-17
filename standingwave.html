@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>波</title>
+    <style>
+        #canvas{
+            width: 1200px;
+            height: 600px;
+            background-color: #000000;
+        }
+    </style>
+    <script>
+        let canvasElement;
+        let context;
+        let A;   //振幅
+        let T;   //周期
+        let L=100;   //波長
+        let t=0;    //時間
+        let v=1;    //速度の向き
+
+        var width;
+        var height;
+        
+        let ASlider;    //振幅の調整
+        let LSlider;    //波長の調整
+        let FSlider;    //振動数の調整
+
+        let AnimeBox;   //波形を動かすかどうか。
+        let SlowBox;   //ゆっくりと再生
+        let w0Box;  //入射波を表示するかどうか。
+        let w1Box;  //反射波を表示するかどうか。
+        let w2Box;  //定在波を表示するかどうか。
+        let End;   //波の描写の最端
+        let Wall;   //壁の位置
+
+        let center; //センターラインの位置
+        let mode0;  //端なし
+        let mode1;  //自由端
+        let mode2;  //固定端
+        let CenterBox;      //センターライン
+        let dph; //位相差
+
+        window.addEventListener('load',function(){
+            drawStart();
+        })
+        function drawStart(){
+            canvasElement=document.getElementById('canvas');
+            canvasElement.width=canvasElement.clientWidth;
+            canvasElement.height=canvasElement.clientHeight;
+            context=canvasElement.getContext('2d');
+
+            width=canvasElement.width;
+            height=canvasElement.height;
+
+            center=height/2;
+
+            A=height*0.2;//振幅の設定
+            L=width/4;
+            Wall=L*3;
+            T=100;
+        
+            ASlider = document.getElementById('ASlider');
+            ASlider.value=A;
+            ASlider.max=height*0.25;
+            ASlider.addEventListener('input', AChange);
+
+            LSlider = document.getElementById('LSlider');
+            LSlider.value=-12;
+            LSlider.addEventListener('input', LChange);
+
+           
+            FSlider = document.getElementById('FSlider');
+            FSlider.max=-2;
+            FSlider.min=-200;
+            FSlider.value=-T;   //本当は1/T
+            FSlider.addEventListener('input', FChange);
+
+            AnimeBox = document.getElementById('AnimeBox');   //アニメーション
+
+            SlowBox = document.getElementById('SlowBox');   //ゆっくりと再生
+           
+            w0Box = document.getElementById('w0Box');   //入射波を表示するかどうか。
+            w1Box = document.getElementById('w1Box');   //反射波を表示するかどうか。
+            w2Box = document.getElementById('w2Box');   //定在波を表示するかどうか。
+
+            mode0 = document.getElementById('mode0');   //端なし
+            mode1 = document.getElementById('mode1');   //自由端
+            mode2 = document.getElementById('mode2');   //固定端
+            
+            CenterBox = document.getElementById('CenterBox');   //センターライン
+         
+            
+            loop();
+        }
+        
+        function wave0(){
+            //入射波 
+            context.strokeStyle="#ffaaaa";
+            context.lineWidth=5;
+            context.beginPath();
+            for(x=0.1;x<End;x+=0.1){
+                y=getY0(x-0.1);
+                context.moveTo(x-0.1,center-y);
+                y=getY0(x);
+                context.lineTo(x,center-y);
+
+            }
+            context.closePath();
+            context.stroke();
+
+        }
+        function wave1(){
+            //反射波
+            context.strokeStyle="#aaaaff";
+            context.lineWidth=5;
+            context.beginPath();
+            for(x=0.1;x<End;x+=0.1){
+                y=getY1(x-0.1);
+                context.moveTo(x-0.1,center-y);
+                y=getY1(x);
+                context.lineTo(x,center-y);
+
+            }
+            context.closePath();
+            context.stroke();
+
+        }
+        function wave2(){
+            //合成波
+            context.strokeStyle="#ffffff";
+            context.lineWidth=5;
+            context.beginPath();
+            for(x=0.1;x<End;x+=0.1){
+                y=getY0(x-0.1)+getY1(x-0.1);
+                context.moveTo(x-0.1,center-y);
+                y=getY0(x)+getY1(x);
+                context.lineTo(x,center-y);
+
+            }
+            context.closePath();
+            context.stroke();
+
+        }
+        
+        function loop(){
+            var width=canvasElement.width;
+            var height=canvasElement.height;
+        
+            context.clearRect(0,0,width,height);
+
+            if(CenterBox.checked){
+                //センターラインの変位を表示
+                context.strokeStyle="#888888";
+                context.lineWidth=5;
+                context.beginPath();
+                context.moveTo(0,center);
+                context.lineTo(End,center);
+                context.closePath();
+                context.stroke();
+            }
+
+
+            dph=0;
+            if(mode0.checked){
+                End=width;
+             
+                
+            }else{
+
+                End=Wall;
+
+                //端
+                context.strokeStyle="#aaaaaa";
+                context.lineWidth=20;
+                context.beginPath();
+                context.moveTo(End,0);
+                context.lineTo(End,height);
+                context.closePath();
+                context.stroke();
+
+                if(mode2.checked){
+                    dph=Math.PI;
+                }
+                context.fillStyle="#ffffff";
+                context.beginPath();
+                context.arc(End,center-getY0(center)-getY1(center),20,0,2*Math.PI,false);
+                context.closePath();
+                context.fill();
+                    
+               
+            }
+
+            if(w0Box.checked){wave0();} //入射波
+            if(w1Box.checked){wave1();} //入射波
+            if(w2Box.checked){wave2();} //入射波
+            
+            
+
+
+
+
+           if(AnimeBox.checked){
+
+                if(SlowBox.checked){
+
+                    t+=0.2;
+                }else{
+                    t++;
+
+                }
+
+            }         
+            requestAnimationFrame(loop);
+
+        }
+        function sinWave(A0,T0,L0,x0,t0,ph0,v0){
+            
+            return A0*Math.sin(2*Math.PI*(t0/T0-v0*x0/L0)+ph0) ;
+        }
+        function getY0(x){
+            let y;
+            y=sinWave(A,T,L,x,t,0,1);
+
+            return y
+        }
+        function getY1(x){
+            let y;
+            y=sinWave(A,T,L,x,t,dph,-1);
+
+            return y
+        }
+ 
+        function AChange(event){
+            A=ASlider.value;
+
+        }
+        function LChange(event){
+            let n=-LSlider.value*1;
+            L=Wall*4/n
+
+        }
+      
+        function FChange(event){
+            T=-FSlider.value;   //本当は1/F
+          
+        }
+
+
+
+    </script>
+
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <br>
+    <label><input type="checkbox" checked id="w0Box">入射波</label>
+    <label><input type="checkbox" id="w1Box">反射波</label>
+    <label><input type="checkbox" id="w2Box">定在波</label>
+    <br>
+    <label><input type="radio" name='mode' id="mode0" checked>端なし</label>
+    <label><input type="radio" name='mode' id="mode1">自由端</label>
+    <label><input type="radio" name='mode' id="mode2">固定端</label>
+    <br> 
+    <label>振幅<input type="range" id="ASlider" min="0"></label>
+    <label>波長<input type="range" id="LSlider" min="-40" max="-1"></label>
+     <label>振動数<input type="range" id="FSlider"></label>
+    
+    <br>
+    <label><input type="checkbox" checked id="AnimeBox">アニメーション</label>
+    <label><input type="checkbox" id="SlowBox">スロー</label>
+    <label><input type="checkbox" id="CenterBox">センターライン</label>
+  
+        
+
+        
+</body>
+</html>
