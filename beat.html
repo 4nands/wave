@@ -1,0 +1,234 @@
+﻿<html>
+	<head>
+	<title>うなり</title>
+		<style>
+			#c1{
+				width: 600px;
+				height: 100px;
+				background-color: #000000;
+			}
+			#c2{
+				width: 600px;
+				height: 100px;
+				background-color: #000000;
+			}
+			#c3{
+				width: 600px;
+				height: 100px;
+				background-color: #000000;
+			}
+		</style>
+		<script>
+
+		let A=20;//振幅
+
+		let L=400;//波長
+		let n1=50;
+		let n2=52;
+		let beatBox;
+		let f1Slider;
+		let f2Slider;
+		let f1Text;	//振動数１の表示用
+		let f2Text;	//振動数2の表示用
+		
+
+		onload=function(){
+			beatBox = document.getElementById('beatBox');   //アニメーション
+
+			//振動数１の調整
+			f1Slider = document.getElementById('f1Slider');
+            f1Slider.value=n1;
+            f1Slider.addEventListener('input', f1Change);
+
+			//振動数２の調整
+			f2Slider = document.getElementById('f2Slider');
+            f2Slider.value=n2;
+            f2Slider.addEventListener('input', f2Change);
+
+			f1Text=document.getElementById('f1Text');
+			f1Text.textContent=n1;		//振動数１の表示
+
+			f2Text=document.getElementById('f2Text');
+			f2Text.textContent=n2;		//振動数１の表示
+
+
+			loop();			
+		}
+		function loop(){
+			disp();
+			requestAnimationFrame(loop)
+		}
+		function disp(){
+			//波の表示
+			wave();
+			wave2();
+			beat();
+
+		}
+		
+		function wave(){
+			var cvs=document.getElementById("c1");
+			var ctx=cvs.getContext("2d");
+				
+			var cy;//媒質の中心座標
+			var x;//媒質のx座標
+			var y;//媒質のy座標
+				
+			var t;//時間
+			var n=n1;
+			var T;//周期
+				
+			cvs.width=cvs.clientWidth;
+			cvs.height=cvs.clientHeight;
+
+			ctx.strokeStyle="#ffffff";
+
+
+			cy=cvs.height/2;
+			T=cvs.width/n;
+
+				
+			ctx.beginPath();				
+			for(t=0;t<cvs.width;t++){//A
+				
+				
+			y=A*Math.sin(Math.PI*2*t/T);
+				
+			if(x===0){
+				ctx.moveTo(t,cy-y);
+			}
+			else{
+				ctx.lineTo(t,cy-y);
+				
+			}
+			}//A
+			ctx.lineWidth=3;
+			ctx.stroke();
+
+
+
+
+
+		}
+		function wave2(){
+			var cvs=document.getElementById("c2");
+			var ctx=cvs.getContext("2d");
+				
+			var cy;//媒質の中心座標
+			var x;//媒質のx座標
+			var y;//媒質のy座標
+				
+			var t;//時間
+			var n=n2;
+			var T;//周期
+				
+			cvs.width=cvs.clientWidth;
+			cvs.height=cvs.clientHeight;
+
+			ctx.strokeStyle="#ffffff";
+
+
+			cy=cvs.height/2;
+			T=cvs.width/n;
+
+				
+			ctx.beginPath();				
+			for(t=0;t<cvs.width;t++){//A
+				
+				
+			y=A*Math.sin(Math.PI*2*t/T);
+				
+			if(x===0){
+				ctx.moveTo(t,cy-y);
+			}
+			else{
+				ctx.lineTo(t,cy-y);
+				
+			}
+			}//A
+			ctx.lineWidth=3;
+			ctx.stroke();
+
+
+		}
+		
+		function beat(){
+			var cvs=document.getElementById("c3");
+			var ctx=cvs.getContext("2d");
+				
+			var cy;//媒質の中心座標
+			var x;//媒質のx座標
+			var y;//媒質のy座標
+				
+			var t;//時間
+			var T1;//周期
+			var T2;//周期
+
+
+				
+			cvs.width=cvs.clientWidth;
+			cvs.height=cvs.clientHeight;
+
+			ctx.clearRect(0,0,cvs.width,cvs.height);
+
+			if(beatBox.checked){
+				ctx.strokeStyle="#ffffff";
+
+
+				cy=cvs.height/2;
+				T1=cvs.width/n1;
+				T2=cvs.width/n2;
+
+					
+				ctx.beginPath();				
+				for(t=0;t<cvs.width;t++){//A
+					
+					
+				y=A*Math.sin(Math.PI*2*t/T1)+A*Math.sin(Math.PI*2*t/T2);
+					
+				if(x===0){
+					ctx.moveTo(t,cy-y);
+				}
+				else{
+					ctx.lineTo(t,cy-y);	
+				}
+				}
+				ctx.lineWidth=3;
+				ctx.stroke();
+
+			}
+
+		}
+			function f1Change(enent){
+				n1=f1Slider.value;
+				f1Text.textContent=n1;
+			}
+			function f2Change(enent){
+				n2=f2Slider.value;
+				f2Text.textContent=n2;
+			}
+		</script>
+	</head>
+	<p>
+		f<sub>1</sub>=<a id="f1Text"></a>
+		<label><input type="range" id="f1Slider" min="20" max="100" step="1"></label>
+		<br>
+		<canvas id="c1"></canvas>
+		<br>
+	</p>
+	<p>
+		f<sub>2</sub>=<a id="f2Text"></a>
+		<label><input type="range" id="f2Slider" min="20" max="100" step="1"></label>
+		<br>
+		<canvas id="c2"></canvas>
+	</p>
+	<br>
+	<p>
+	<label><input type="checkbox" id="beatBox">うなり</label>
+	<br>
+	<canvas id="c3"></canvas>
+	</p>
+
+	</body>
+
+</html>
